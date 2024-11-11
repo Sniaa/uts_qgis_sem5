@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lombok Barat</title>
+    <link rel="stylesheet" href="assets/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="assets/leaflet.js"></script>
+    <script src="lobar_line.js"></script>
+    <script src="lobar_art.js"></script>
+    <style>
+        #map { height: 100vh; }
+        body, html { margin: 0; padding: 0; height: 100%; }
+        
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>  
+    <script>
+        var map = L.map('map', {
+            center: [-8.682248179484606, 116.1248160173122],
+            zoom: 13,
+            minZoom: 2,
+            maxZoom: 18
+        });
+
+        // Basemap layers
+        var openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+
+        var streetMap = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=YOUR_MAPBOX_ACCESS_TOKEN', {
+            attribution: '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
+        });
+
+        var satelliteMap = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=YOUR_MAPBOX_ACCESS_TOKEN', {
+            attribution: '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
+        });
+
+        var terrainMap = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/{z}/{x}/{y}?access_token=YOUR_MAPBOX_ACCESS_TOKEN', {
+            attribution: '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
+        });
+
+        // Tampilkan Street Map sebagai layer awal
+        streetMap.addTo(map);
+
+        // Ikon kustom
+        var icons = {
+            pemerintah: L.icon({ iconUrl: 'assets/images/icon_pemerintah.jpg', iconSize: [25, 41], iconAnchor: [12, 41] }),
+            keamanan: L.icon({ iconUrl: 'assets/images/icon_polisi.jpg', iconSize: [25, 41], iconAnchor: [12, 41] }),
+            kesehatan: L.icon({ iconUrl: 'assets/images/icon_kesehatan.jpg', iconSize: [25, 41], iconAnchor: [12, 41] }),
+            wisata: L.icon({ iconUrl: 'assets/images/icon_wisata.jpg', iconSize: [25, 41], iconAnchor: [12, 41] }),
+            sekolah: L.icon({ iconUrl: 'assets/images/icon_sekolah.jpg', iconSize: [25, 41], iconAnchor: [12, 41] })
+        };
+
+        // Data kecamatan dan marker           
+        var kecamatanLayers = {
+            "kab_lobar": L.layerGroup([
+            L.geoJSON(kab_lobar, { style: { color: "blue", weight: 2, opacity: 1 } }),
+            ]),
+
+            "Gerung": L.layerGroup([
+                L.geoJSON(gerung, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                //camat
+                L.marker([-8.682237573593493, 116.1247731019701], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat Gerung</b>'),
+                //keamanan
+                L.marker([-8.682793663031184, 116.12697511925015], {icon: icons.keamanan}).bindPopup('<b>Polsek Gerung</b>'),
+                L.marker([-8.682319968400739, 116.127792553924], {icon: icons.keamanan}).bindPopup('<b>Sektor Gerung</b>'),
+                L.marker([-8.664331949914954, 116.13341446373893], {icon: icons.keamanan}).bindPopup('<b>Pos Polisi GMS</b>'),
+                L.marker([-8.664756205550086, 116.13620396097534], {icon: icons.keamanan}).bindPopup('<b>Pos Polisi Lalulintas</b>'),
+                //kesehatan
+                L.marker([-8.681853032876305, 116.12015362032899], {icon: icons.kesehatan}).bindPopup('<b>Rumah Sakit Umum Daerah Patut Patuh Patju</b>'),
+                L.marker([-8.682446962924747, 116.12586136082813], {icon: icons.kesehatan}).bindPopup('<b>RSUD GERUNG LOMBOK BARAT NTB</b>'),
+                L.marker([-8.685834985024995, 116.11712235407906], {icon: icons.kesehatan}).bindPopup('<b>Nengah suartadi</b>'),
+                L.marker([-8.672920962461165, 116.15191056654531], {icon: icons.kesehatan}).bindPopup('<b>Klinik Pratama Buana Medika</b>'),
+                L.marker([-8.677629994532003, 116.12433982554508], {icon: icons.kesehatan}).bindPopup('<b>Klinik Bersalin Bidan Sri Wahyuningsih</b>'),
+                L.marker([-8.690258470654648, 116.12513374740635], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Gerung</b>'),
+                L.marker([-8.666516966358612, 116.1406505958892], {icon: icons.kesehatan}).bindPopup('<b>Home stay thataa</b>'),
+                L.marker([-8.693753047416676, 116.12648853299663], {icon: icons.kesehatan}).bindPopup('<b>RSUD Gerung</b>'),
+                //wisata
+                L.marker([-8.678307713198008, 116.1406505675787], {icon: icons.wisata}).bindPopup('<b>Taman Kota Gerung</b>'),
+                L.marker([-8.691374080511144, 116.10837823032047], {icon: icons.wisata}).bindPopup('<b>Wisata Kuliner Kebon Ayu</b>'),
+                L.marker([-8.69800420770493, 116.14962179899608], {icon: icons.wisata}).bindPopup('<b>Wisata Kuliner Mewah (Mepet Sawah) Tempos</b>'),
+                L.marker([-8.706906593557797, 116.10998000273108], {icon: icons.wisata}).bindPopup('<b>Bukit Batu Idung (BBI)</b>'),
+                L.marker([-8.71744344018445, 116.15837115946837], {icon: icons.wisata}).bindPopup('<b>Bukit Batu Palar Banyu Urip</b>'),
+                L.marker([-8.683166852533224, 116.12764377452575], {icon: icons.wisata}).bindPopup('<b>Taman Kehati</b>'),
+                L.marker([-8.69132110143177, 116.10674199588917], {icon: icons.wisata}).bindPopup('<b>Agrowisata Petik Melon Kebon Ayu</b>'),
+                L.marker([-8.673503212503118, 116.11481008020371], {icon: icons.wisata}).bindPopup('<b>KOLAM PEMANCINGAN ANANG</b>'),
+                L.marker([-8.664339397507609, 116.13386449209551], {icon: icons.wisata}).bindPopup('<b>Bundaran Gerung</b>'),
+                //sekolah
+                L.marker([-8.679226622827859, 116.1231902576306], {icon: icons.sekolah}).bindPopup('<b>TK Negeri 1 Gerung</b>'),
+                L.marker([-8.66599013108159, 116.14310297636437], {icon: icons.sekolah}).bindPopup('<b>TK NEGERI GERUNG</b>'),
+                L.marker([-8.682260018761303, 116.1236092575503], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Gerung Utar</b>'),
+                L.marker([-8.68839586589125, 116.12065009424921], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 2 Gerung Selatan</b>'),
+                L.marker([-8.683544274140392, 116.12627972199272], {icon: icons.sekolah}).bindPopup('<b>SDN 2 Gerung Utara</b>'),
+                L.marker([-8.684400441950732, 116.13075455430167], {icon: icons.sekolah}).bindPopup('<b>SDN 3 GERUNG SELATAN</b>'),
+                L.marker([-8.709914566386278, 116.14792577824613], {icon: icons.sekolah}).bindPopup('<b>MA Swasta Nurul Huda Tempos</b>'),
+                L.marker([-8.68293309053173, 116.12389317723517], {icon: icons.sekolah}).bindPopup('<b>SMPN 1 GERUNG</b>'),
+                L.marker([-8.684545179549106, 116.1414884674956], {icon: icons.sekolah}).bindPopup('<b>Smpn 2 Gerung</b>'),
+                L.marker([-8.69438725691667, 116.12861386486603], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 5 Gerung</b>'),
+                L.marker([-8.664607097563076, 116.141117587523], {icon: icons.sekolah}).bindPopup('<b>SMPN 4 Gerung</b>'),
+                L.marker([-8.68378185545099, 116.14137509582231], {icon: icons.sekolah}).bindPopup('<b>SMKN 1 GERUNG</b>'),
+                L.marker([-8.680218273736948, 116.12438062035126], {icon: icons.sekolah}).bindPopup('<b>SMA Negeri 1 Gerung</b>'),
+                L.marker([-8.670206125024954, 116.11888745656262], {icon: icons.sekolah}).bindPopup('<b>SMK ISLAM MANBAUL ULUM </b>'),
+                L.marker([-8.676909203274885, 116.12420895898286], {icon: icons.sekolah}).bindPopup('<b>SMAN 2 GERUNG</b>'),
+                L.marker([-8.667685270710598, 116.08603047315235], {icon: icons.sekolah}).bindPopup('<b>SMKN 2 Gerung</b>'),
+                L.marker([-8.678376271290917, 116.12310933027896], {icon: icons.sekolah}).bindPopup('<b>MAN Gerung / MAN Lombok Barat</b>'),
+                L.marker([-8.680412617837932, 116.1221651927528], {icon: icons.sekolah}).bindPopup('<b>SLB Negeri Gerung</b>')
+            ]),
+            "Labu Api": L.layerGroup([
+                L.geoJSON(labu_api, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                //camat
+                L.marker([-8.635530290520993, 116.12341555964042], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat labuapi</b>'),
+                
+                //keamanan labuapi
+                L.marker([-8.634655188502235, 116.08173608588628], {icon: icons.keamanan}).bindPopup('<b>Satgas Linmas Desa Kuranji</b>'),
+                
+                //kesehatan labuapi
+                L.marker([-8.638980623819082, 116.10484664494015], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Pembantu Telega Waru Kec. Labuapi</b>'),
+                L.marker([-8.63746693456307, 116.09892655824086], {icon: icons.kesehatan}).bindPopup('<b>Klinik Labuapi Barokah</b>'),
+                L.marker([-8.643118010116146, 116.10647977230549], {icon: icons.kesehatan}).bindPopup('<b>Klinik Kita Labuapi</b>'),
+                L.marker([-8.624045290891203, 116.12209655273644], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Labuapi</b>'),
+
+                //wisata labuapi
+                L.marker([-8.63249589792485, 116.07676056299405], {icon: icons.wisata}).bindPopup('<b>Pantai Kuranji Lombok Barat</b>'),
+                L.marker([-8.646779060720117, 116.07017040060548], {icon: icons.wisata}).bindPopup('<b>Pantai Karang Bangket</b>'),
+                L.marker([-8.63202543585445, 116.07178175908767], {icon: icons.wisata}).bindPopup('<b>Pantai Kuranji Lombok Barat</b>'),
+                L.marker([-8.635878703261092, 116.07344177752486], {icon: icons.wisata}).bindPopup('<b>D WAN CAFE</b>'),
+                L.marker([-8.63994599838144, 116.08729932273963], {icon: icons.wisata}).bindPopup('<b>Pura Gunung Pengsong</b>'),
+                L.marker([-8.632667649821286, 116.08867064231818], {icon: icons.wisata}).bindPopup('<b>Aramina</b>'),
+                L.marker([-8.626602251941122, 116.12049969284358], {icon: icons.wisata}).bindPopup('<b>JONA FARM wisata melon hidroponik</b>'),
+                L.marker([-8.62710175896281, 116.11862315026241], {icon: icons.wisata}).bindPopup('<b>Taman Agro Wisata Labuapi</b>'),
+                L.marker([-8.625032368362579, 116.1412860118424], {icon: icons.wisata}).bindPopup('<b>KOLAM RENANG RINDU</b>'),
+                L.marker([-8.627030400790623, 116.14915305574038], {icon: icons.wisata}).bindPopup('<b>Bendung Datar</b>'),
+                
+                //sekolah labuapi
+                L.marker([-8.62667713218099, 116.16031909699454], {icon: icons.sekolah}).bindPopup('<b>Sekolah Tinggi Ilmu Dawah Mustaf Ibrahim Al Islahuddin</b>'),
+                L.marker([-8.611856044224414, 116.15244046363647], {icon: icons.sekolah}).bindPopup('<b>SMAN 2 LABUAPI</b>'),
+                L.marker([-8.616836608183904, 116.16324354330816], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 3 Labuapi</b>'),
+                L.marker([-8.6174366717032, 116.15001280528327], {icon: icons.sekolah}).bindPopup('<b>SMP Plus Al Hikmah Adnani</b>'),
+                L.marker([-8.622477167658369, 116.16397184081411], {icon: icons.sekolah}).bindPopup('<b>PAUD Tarbiyah Islamiyah Tangkeban</b>'),
+                L.marker([-8.635819189867414, 116.09398145168252], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Perampuan Labuapi</b>'),
+                L.marker([-8.633750462358218, 116.0961759665797], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 2 Labuapi</b>'),
+                L.marker([-8.639300681283542, 116.10679129445431], {icon: icons.sekolah}).bindPopup('<b>SMA Negeri 1 Labuapi</b>'),
+                L.marker([-8.637686080564679, 116.11255827546312], {icon: icons.sekolah}).bindPopup('<b>Tanah Pondok</b>'),
+                L.marker([-8.6260304766036, 116.10199398314943], {icon: icons.sekolah}).bindPopup('<b>PONDOK PESANTREN NU ABHARIYAH - LOMBOK,NTB</b>'),
+                L.marker([-8.622851613092358, 116.10577059018176], {icon: icons.sekolah}).bindPopup('<b>SMP plus miftahul falah</b>'),
+                L.marker([-8.624617651709238, 116.12266325199276], {icon: icons.sekolah}).bindPopup('<b>TK NEGERI PEMBINA LABUAPI</b>'),
+                L.marker([-8.634204574213937, 116.12455155550894], {icon: icons.sekolah}).bindPopup('<b>SMPN 1 LABUAPI</b>'),
+                L.marker([-8.626585513551321, 116.1206728780163], {icon: icons.sekolah}).bindPopup('<b>SMKN 1 LABUAPI</b>'),
+                L.marker([-8.631934009307829, 116.12618468287428], {icon: icons.sekolah}).bindPopup('<b>PAUD CENDEKIA</b>'),
+                L.marker([-8.626787344955407, 116.12210186446096], {icon: icons.sekolah}).bindPopup('<b>TKN 2 Labuapi</b>'),
+                L.marker([-8.625677270898201, 116.12587847149328], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Labuapi</b>'),
+                L.marker([-8.629966175340012, 116.12567433057261], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 2 Labuapi</b>'),
+                L.marker([-8.627369610001306, 116.12614049901184], {icon: icons.sekolah}).bindPopup('<b>Madrasah Tsanawiyah Assa`adah Labuapi</b>'),
+                L.marker([-8.629859797955929, 116.12413768087048], {icon: icons.sekolah}).bindPopup('<b>PAUDIA LABUAPI</b>')
+
+            ]),
+            "Kediri": L.layerGroup([
+                L.geoJSON(kediri, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                //kecamatan
+                L.marker([-8.634857697479756, 116.14993149402198], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat kediri</b>'),
+
+                //keamanan
+                L.marker([-8.64359697390567, 116.1278918849075], {icon: icons.keamanan}).bindPopup('<b>Pos polisi</b>'),
+                L.marker([-8.63536586674161, 116.14952121732523], {icon: icons.keamanan}).bindPopup('<b>POLSEK Kediri</b>'),
+                L.marker([-8.632904985391505, 116.15123783100918], {icon: icons.keamanan}).bindPopup('<b>KantorPolisi Sipil</b>'),
+
+                //kesehatan kediri
+                L.marker([-8.652097457658606, 116.13427277685624], {icon: icons.kesehatan}).bindPopup('<b>PIJAT URAT OMBE</b>'),
+                L.marker([-8.651064220593417, 116.11437320518803], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Banyumulek Kediri Lombok Barat</b>'),
+                L.marker([-8.638590451319509, 116.14218234873798], {icon: icons.kesehatan}).bindPopup('<b>Dinas Ketahanan Pangan Kabupaten Lombok Barat</b>'),
+                L.marker([-8.633414140301033, 116.14939212621056], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Kediri</b>'),
+
+                //wisata kediri
+                L.marker([-8.629204894834855, 116.16316136837281], {icon: icons.wisata}).bindPopup('<b>SEME</b>'),
+                L.marker([-8.630053484742275, 116.15474996132149], {icon: icons.wisata}).bindPopup('<b>Wisata Aiq Kokoq Babak Kediri</b>'),
+                L.marker([-8.648382561150388, 116.15646657441489], {icon: icons.wisata}).bindPopup('<b>Tumpang</b>'),
+
+                //sekolah kediri
+                L.marker([-8.658098923821758, 116.14713701852165], {icon: icons.sekolah}).bindPopup('<b>TK Negeri 2 Gerung</b>'),
+                L.marker([-8.648535426317064, 116.11155484349936], {icon: icons.sekolah}).bindPopup('<b>SMK Negeri 1 Kediri</b>'),
+                L.marker([-8.646615377917206, 116.11392181039373], {icon: icons.sekolah}).bindPopup('<b>SMPN 2 Kediri</b>'),
+                L.marker([-8.63983512870297, 116.13370722601762], {icon: icons.sekolah}).bindPopup('<b>SMA Negeri 1 Kediri</b>'),
+                L.marker([-8.638763067708021, 116.17781568631558], {icon: icons.sekolah}).bindPopup('<b>SMK NURUL MUJAHIDIN KEDIRI</b>'),
+                L.marker([-8.636442073692752, 116.17271216329895], {icon: icons.sekolah}).bindPopup('<b>SD-SMPN SATAP 2 KEDIRI</b>'),
+                L.marker([-8.645070044504388, 116.1572484885585], {icon: icons.sekolah}).bindPopup('<b>YAYASAN AKSARA MUDA MANDIRI</b>'),
+                L.marker([-8.64143723875422, 116.14887871081119], {icon: icons.sekolah}).bindPopup('<b>SDIT INSAN MULIA</b>'),
+                L.marker([-8.634221979097928, 116.14775593574754], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 1 Kediri</b>'),
+                L.marker([-8.636795269355511, 116.15398223382783], {icon: icons.sekolah}).bindPopup('<b>SMA NW Kediri</b>'),
+                L.marker([-8.633868781026116, 116.15449258612952], {icon: icons.sekolah}).bindPopup('<b>MIDI Nurul Hakim Kediri</b>'),
+                L.marker([-8.633717410322697, 116.15928989776515], {icon: icons.sekolah}).bindPopup('<b>MA Swasta Putra Al-Ishlahuddiny Kediri</b>'),
+                L.marker([-8.63215324283208, 116.16005542621765], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 3 Kediri</b>'),
+                L.marker([-8.633616496486693, 116.16148441266232], {icon: icons.sekolah}).bindPopup('<b>PAUD IKHTIAR BERSAMA KEDIRI</b>'),
+                L.marker([-8.632355071259664, 116.15382912813735], {icon: icons.sekolah}).bindPopup('<b>MTs YUSUF ABDUSSATAR KEDIRI</b>'),
+                L.marker([-8.636442073692752, 116.15040976771621], {icon: icons.sekolah}).bindPopup('<b>Madrasah Tsanawiyah Dakwah Islamiyah Putri Kediri</b>'),
+                L.marker([-8.63159821409968, 116.15439051566916], {icon: icons.sekolah}).bindPopup('<b>SDN 2 KEDIRI INDUK</b>'),
+                L.marker([-8.635979493474128, 116.15081813362083], {icon: icons.sekolah}).bindPopup('<b>SDN 4 Kediri Selatan</b>'),
+                L.marker([-8.63534945768779, 116.15121262810324], {icon: icons.sekolah}).bindPopup('<b>SDN 2 KEDIRI SELATAN</b>'),
+                L.marker([-8.635034515163987, 116.15073059297947], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Kediri Selatan</b>')
+            ]),
+            "Kuripan": L.layerGroup([
+                L.geoJSON(kuripan, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                //kecamatan
+                L.marker([-8.669848741668018, 116.16986603450272], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat kuripan</b>'),
+
+                //keamanan kuripan
+                L.marker([-8.670988296654071, 116.1681338589653], {icon: icons.keamanan}).bindPopup('<b>Polsek Kuripan</b>'),
+                L.marker([-8.673618627283105, 116.16603100720249], {icon: icons.keamanan}).bindPopup('<b>kantor polisi sektor kuripan</b>'),
+               
+                //kesehatan kuripan
+                L.marker([-8.678108615414247, 116.17083548185778], {icon: icons.kesehatan}).bindPopup('<b>KLINIK AISHA KURIPAN SELATAN</b>'),
+                L.marker([-8.664362977610697, 116.14577292207214], {icon: icons.kesehatan}).bindPopup('<b>Poskesdes Jagaraga</b>'),
+                L.marker([-8.648071200643386, 116.18233679354019], {icon: icons.kesehatan}).bindPopup('<b>klinik dan alkes</b>'),
+                L.marker([-8.660459803631264, 116.1598491542805], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Kuripan</b>'),
+
+
+                //wisata kuripan
+                L.marker([-8.709069825245445, 116.16937189367826], {icon: icons.wisata}).bindPopup('<b>Wisata Bukit Batu Gendang</b>'),
+                L.marker([-8.716584486412529, 116.1613806027311], {icon: icons.wisata}).bindPopup('<b>WISATA BATU PALAR INDAH</b>'),
+
+                //sekolah kuripan
+                L.marker([-8.643132048951436, 116.15778875562557], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 2 Kuripan</b>'),
+                L.marker([-8.63992105726411, 116.18341077932996], {icon: icons.sekolah}).bindPopup('<b>SMK Negeri 2 Kuripan</b>'),
+                L.marker([-8.640777324388058, 116.1826168574687], {icon: icons.sekolah}).bindPopup('<b>SMPN 2 Kuripan</b>'),
+                L.marker([-8.64427372829337, 116.18218380918074], {icon: icons.sekolah}).bindPopup('<b>SDN 3 Kuripan utara</b>'),
+                L.marker([-8.655904389427022, 116.17669853086655], {icon: icons.sekolah}).bindPopup('<b>SDN 2 Kuripan Utara</b>'),
+                L.marker([-8.663246176172482, 116.19118064319714], {icon: icons.sekolah}).bindPopup('<b>SD-SMP Negeri 02 Satap Kuripan</b>'),
+                L.marker([-8.655779177107112, 116.15804999909697], {icon: icons.sekolah}).bindPopup('<b>SMA Negeri 1 Kuripan</b>'),
+                L.marker([-8.659342990602905, 116.15942329004416], {icon: icons.sekolah}).bindPopup('<b>SDN 4 JAGARAGA KECAMATAN KURIPAN</b>'),
+                L.marker([-8.658324761619756, 116.15624755472884], {icon: icons.sekolah}).bindPopup('<b>SMPN 4 KURIPAN</b>'),
+                L.marker([-8.6883613569269, 116.17307036883152], {icon: icons.sekolah}).bindPopup('<b>SMP N 3 Kuripan</b>'),
+                L.marker([-8.687682590354957, 116.1677488664113], {icon: icons.sekolah}).bindPopup('<b>SDN 2 KURIPAN SELATAN</b>'),
+                L.marker([-8.67953729567955, 116.16852134256905], {icon: icons.sekolah}).bindPopup('<b>SDN 1 KURIPAN SELATAN</b>'),
+                L.marker([-8.672749415075451, 116.16620391409575], {icon: icons.sekolah}).bindPopup('<b>sdn 1 kuripan</b>'),
+                L.marker([-8.671306974641169, 116.1894640295132], {icon: icons.sekolah}).bindPopup('<b>SDN 2 Kuripan Timur</b>'),
+                L.marker([-8.669864528668661, 116.17796271783077], {icon: icons.sekolah}).bindPopup('<b>State Elementary School 1 Kuripan Timur</b>'),
+                L.marker([-8.67092006997571, 116.16043871370327], {icon: icons.sekolah}).bindPopup('<b>SMKN 1 Kuripan</b>'),
+                L.marker([-8.667230187806, 116.16074217099742], {icon: icons.sekolah}).bindPopup('<b>SMPN 1 KURIPAN</b>'),
+                L.marker([-8.666900196578828, 116.16580990780969], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 6 Kuripan</b>'),
+                L.marker([-8.667170189422604, 116.17087764462197], {icon: icons.sekolah}).bindPopup('<b>SDN 4 Kuripan</b>'),
+                L.marker([-8.6664437225568, 116.16554090028305], {icon: icons.sekolah}).bindPopup('<b>MA Swasta Darul Hasanah Kuripan</b>')
+
+            ]),
+            "Narmada": L.layerGroup([
+                L.geoJSON(narmada, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                //camat
+                L.marker([-8.590240072783681, 116.2028937823765], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat narmada</b>'),
+
+                //keamanan narmada
+                L.marker([-8.59143885149068, 116.20020791141944], {icon: icons.keamanan}).bindPopup('<b>Polsek Narmada</b>'),
+                L.marker([-8.59143885149068, 116.19025155205256], {icon: icons.keamanan}).bindPopup('<b>Pospol Pelagan</b>'),
+
+                //kesehatan narmada
+                L.marker([-8.56532947033323, 116.23488799778045], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Suranadi</b>'),
+                L.marker([-8.584444671188717, 116.23740947023786], {icon: icons.kesehatan}).bindPopup('<b>Posyandu Tibu Piling</b>'),
+                L.marker([-8.591924270462513, 116.21765793598804], {icon: icons.kesehatan}).bindPopup('<b>Herbal kesehatan</b>'),
+                L.marker([-8.597741634578112, 116.17353216798318], {icon: icons.kesehatan}).bindPopup('<b>PUSKESMAS NARMADA</b>'),
+                L.marker([-8.59026214977669, 116.19118247156042], {icon: icons.kesehatan}).bindPopup('<b>PUSKESMAN NARMADA</b>'),
+                
+                //wisata narmada
+                L.marker([-8.592104520372548, 116.16562451918766], {icon: icons.wisata}).bindPopup('<b>Taman Mekarsari Narmada</b>'),
+                L.marker([-8.5127386967996, 116.28225885807869], {icon: icons.wisata}).bindPopup('<b>Taman Hutan Raya Nuraksa</b>'),
+                L.marker([-8.561273718878839, 116.26609172199477], {icon: icons.wisata}).bindPopup('<b>Wisata gunung Aur</b>'),
+                L.marker([-8.535558728340098, 116.27897971944554], {icon: icons.wisata}).bindPopup('<b>Wisata Alam Goa Lawah Lebah Sempage</b>'),
+                L.marker([-8.53723926331633, 116.2442642049949], {icon: icons.wisata}).bindPopup('<b>Wisata Purekmas ( Pusat Rekreasi Masyarakat) Desa Sesaot</b>'),
+                L.marker([-8.527396024677504, 116.26271440847916], {icon: icons.wisata}).bindPopup('<b>Air Terjun Batu Santek</b>'),
+                L.marker([-8.562686459183384, 116.23066931821701], {icon: icons.wisata}).bindPopup('<b>TWA SURANADI</b>'),
+                L.marker([-8.591972634620793, 116.20396507633193], {icon: icons.wisata}).bindPopup('<b>Narmada Park</b>'),
+                L.marker([-8.529556757328953, 116.24402143915958], {icon: icons.wisata}).bindPopup('<b>Wisata Bunut ngengkang</b>'),
+                L.marker([-8.5305170790292, 116.26295717431448], {icon: icons.wisata}).bindPopup('<b>Air Terjun Batu Santek</b>'),
+                L.marker([-8.588608725466347, 116.20595485311777], {icon: icons.wisata}).bindPopup('<b>Narmada Botanic Garden</b>'),
+                L.marker([-8.53051288723081, 116.26614856565543], {icon: icons.wisata}).bindPopup('<b>Air Terjun Jaran Kurus</b>'),
+                L.marker([-8.572672521821527, 116.23097793749501], {icon: icons.wisata}).bindPopup('<b>Taman Bunga Suranadi</b>'),
+                L.marker([-8.570621032566349, 116.2323103164395], {icon: icons.wisata}).bindPopup('<b>Pemandian Suranadi</b>'),
+                L.marker([-8.574162860108581, 116.26372461732332], {icon: icons.wisata}).bindPopup('<b>Wisata Desa sedau</b>'),
+
+                //sekolah narmada
+                L.marker([-8.54757183667336, 116.27562646840421], {icon: icons.sekolah}).bindPopup('<b>SD-SMP Negeri Satu Atap 1 Narmada</b>'),
+                L.marker([-8.53282394694088, 116.24398128227612], {icon: icons.sekolah}).bindPopup('<b>SMP 2 Narmada</b>'),
+                L.marker([-8.549370323016122, 116.23343288439747], {icon: icons.sekolah}).bindPopup('<b>Daar al-Jamhuri</b>'),
+                L.marker([-8.571311145484826, 116.25089229743367], {icon: icons.sekolah}).bindPopup('<b>SMP NEGERI 3 NARMADA</b>'),
+                L.marker([-8.573469190818196, 116.21742842244764], {icon: icons.sekolah}).bindPopup('<b>SDN 2 NARMADA</b>'),
+                L.marker([-8.567714376038897, 116.2377977376565], {icon: icons.sekolah}).bindPopup('<b>Smp Negeri 5 Narmada</b>'),
+                L.marker([-8.585338221025957, 116.25052855966207], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Keru Narmada Lombok Barat</b>'),
+                L.marker([-8.57814491366413, 116.23452409771222], {icon: icons.sekolah}).bindPopup('<b>Desa Golong Narmada</b>'),
+                L.marker([-8.599366614066573, 116.20854650786576], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Peresak Narmada</b>'),
+                L.marker([-8.59440753656592, 116.18977080239077], {icon: icons.sekolah}).bindPopup('<b>SMA Negeri 2 Narmada</b>'),
+                L.marker([-8.601528242922699, 116.20044466235258], {icon: icons.sekolah}).bindPopup('<b>SD 1 Batukuta Narmada</b>'),
+                L.marker([-8.584489186987012, 116.19941585657313], {icon: icons.sekolah}).bindPopup('<b>SMAN 1 NARMADA</b>'),
+                L.marker([-8.592373024464056, 116.21986337143974], {icon: icons.sekolah}).bindPopup('<b>SMK Negeri 1 Narmada</b>'),
+                L.marker([-8.588049650006203, 116.20996111581252], {icon: icons.sekolah}).bindPopup('<b>SDN NO 1 Narmada</b>'),
+                L.marker([-8.587032378266862, 116.20584589269471], {icon: icons.sekolah}).bindPopup('<b>SMA NW NARMADA</b>'),
+                L.marker([-8.588176808781839, 116.20275947535636], {icon: icons.sekolah}).bindPopup('<b>SDN 3 Narmada</b>'),
+                L.marker([-8.590592817420326, 116.20520288908254], {icon: icons.sekolah}).bindPopup('<b>TK Negeri 1 Narmada</b>'),
+                L.marker([-8.594153223150245, 116.19568643562263], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 1 Narmada</b>'),
+                L.marker([-8.596383627262224, 116.19801864093404], {icon: icons.sekolah}).bindPopup('<b>1 NARMADA ELEMENTARY PUBLIC SCHOOL</b>')
+
+            ]),
+            "Sekotong": L.layerGroup([
+                L.geoJSON(sekotong, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                //camat
+                L.marker([-8.77743406260766, 116.04830659956988], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat sekotong</b>'),
+                
+                //keamanan sekotong
+                L.marker([-8.772779856571223, 116.06041814154298], {icon: icons.keamanan}).bindPopup('<b>Polsek Sekotong</b>'),
+
+                //kesehatan sekotong
+                L.marker([-8.838683673281539, 116.08509082680536], {icon: icons.kesehatan}).bindPopup('<b>Pos Kesehatan Dusun Bengkang Desa Buwun Mas</b>'),
+                L.marker([-8.823330843797592, 116.05498786322578], {icon: icons.kesehatan}).bindPopup('<b>KLINIK BUWUN MAS MEDICA</b>'),
+                L.marker([-8.75135596052814, 115.9326338822249], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas ( HOSPITAL )</b>'),
+                L.marker([-8.833885982733284, 116.02002958293981], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Pembantu Blongas</b>'),
+                L.marker([-8.778654294345257, 116.03884453960084], {icon: icons.kesehatan}).bindPopup('<b>Poskesdes sekotong tengah</b>'),
+                L.marker([-8.772601760624365, 115.92656703323455], {icon: icons.kesehatan}).bindPopup('<b>KLINIK KRESHNA HUSADA</b>'),
+
+                //wisata sekotong
+                L.marker([-8.862047539585896, 116.08447285983513], {icon: icons.wisata}).bindPopup('<b>Pantai Pengantap</b>'),
+                L.marker([-8.86815352452402, 116.06250020468062], {icon: icons.wisata}).bindPopup('<b>Pantai Meang</b>'),
+                L.marker([-8.815910156691714, 115.97666952048333], {icon: icons.wisata}).bindPopup('<b>Bukit Simba</b>'),
+                L.marker([-8.752122526814544, 115.8805391541823], {icon: icons.wisata}).bindPopup('<b>Siung Sekotong Beach</b>'),
+                L.marker([-8.733798523121525, 115.8874056089181], {icon: icons.wisata}).bindPopup('<b>Gili Goleng</b>'),
+                L.marker([-8.725654232376332, 115.96636983837965], {icon: icons.wisata}).bindPopup('<b>Pantai Elak Elak</b>'),
+                L.marker([-8.823373948336693, 116.04670735878831], {icon: icons.wisata}).bindPopup('<b>Buwun Mas Hills (Bukit Buwun Mas)</b>'),
+                L.marker([-8.871541064575624, 115.98106704113151], {icon: icons.wisata}).bindPopup('<b>Orong Bukal</b>'),
+                L.marker([-8.871581736325991, 115.97987030730953], {icon: icons.wisata}).bindPopup('<b>Pantai Piling</b>'),
+                L.marker([-8.763702449388902, 116.04658200172905], {icon: icons.wisata}).bindPopup('<b>Mangrove Sekotong Tengah</b>'),
+                L.marker([-8.762391252873973, 116.04740749340606], {icon: icons.wisata}).bindPopup('<b>Tanjung smile desa sekotong tengah</b>'),
+
+                //sekolah sekotong
+                L.marker([-8.841087651992408, 116.05799406235298], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 3 Sekotong</b>'),
+                L.marker([-8.791254018351314, 115.93780387133975], {icon: icons.sekolah}).bindPopup('<b>SMK NEGERI 2 SEKOTONG</b>'),
+                L.marker([-8.757612523707131, 115.9399050983876], {icon: icons.sekolah}).bindPopup('<b>SDN 4 SEKOTONG BARAT</b>'),
+                L.marker([-8.759689247423191, 115.99201552917432], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 4 Sekotong</b>'),
+                L.marker([-8.780040525635942, 116.01260755424325], {icon: icons.sekolah}).bindPopup('<b>SDN 5 Sekotong Tengah</b>'),
+                L.marker([-8.75678183117542, 116.02269344405197], {icon: icons.sekolah}).bindPopup('<b>SD-SMP NEGERI SATU ATAP 4 SEKOTONG</b>'),
+                L.marker([-8.755535788596962, 116.03530080633905], {icon: icons.sekolah}).bindPopup('<b>SDN 4 Sekotong Tengah</b>'),
+                L.marker([-8.761765960678867, 115.88569343623688], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 5 Sekotong</b>'),
+                L.marker([-8.768826694642078, 116.05883454954737], {icon: icons.sekolah}).bindPopup('<b>SMAN 1 Sekotong</b>'),
+                L.marker([-8.79831419221836, 116.0651382306909], {icon: icons.sekolah}).bindPopup('<b>SD / SMP Negeri Satu Atap 3 Sekotong</b>'),
+                L.marker([-8.7360988465585, 115.98644251022326], {icon: icons.sekolah}).bindPopup('<b>SMPN 6 Sekotong</b>'),
+                L.marker([-8.784093841196832, 116.07697573782583], {icon: icons.sekolah}).bindPopup('<b>SDN 2 CENDI MANIK</b>'),
+                L.marker([-8.783574695476116, 116.0692011977488], {icon: icons.sekolah}).bindPopup('<b>SDN 1 CENDI MANIK</b>'),
+                L.marker([-8.779629164249172, 116.04797880456552], {icon: icons.sekolah}).bindPopup('<b>SMPN 1 SEKOTONG</b>'),
+                L.marker([-8.775683591059428, 116.04776868186072], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 1 Sekotong Tengah</b>'),
+                L.marker([-8.774126116410851, 116.05291668812795], {icon: icons.sekolah}).bindPopup('<b>SMK Negeri 1 Sekotong</b>'),
+                L.marker([-8.780563635964365, 116.0607962895574], {icon: icons.sekolah}).bindPopup('<b>SMA Islam Sekotong</b>')
+
+            ]),
+            "Lembar": L.layerGroup([
+                L.geoJSON(lembar, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                //camat
+                L.marker([-8.720868719402247, 116.08275189217464], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat lembar</b>'),
+
+                //keamanan lembar
+                L.marker([-8.72983183395356, 116.08632875972435], {icon: icons.keamanan}).bindPopup('<b>Polsek Lembar Resort Lombok Barat</b>'),
+                L.marker([-8.72692238764118, 116.08028995957078], {icon: icons.keamanan}).bindPopup('<b>Pospol KPPP Lembar</b>'),
+                L.marker([-8.725122718789294, 116.07558637119374], {icon: icons.keamanan}).bindPopup('<b>KPPP Laut Lembar</b>'),
+                L.marker([-8.72761225841984, 116.07504014806428], {icon: icons.keamanan}).bindPopup('<b>Polsek KPPP Lembar</b>'),
+
+                //kesehatan lembar
+                L.marker([-8.783296710029145, 116.10862117989107], {icon: icons.kesehatan}).bindPopup('<b>poskesdes desa mereje</b>'),
+                L.marker([-8.772439060568031, 116.10038143420813], {icon: icons.kesehatan}).bindPopup('<b>Posyandu Mekar Sari</b>'),
+                L.marker([-8.731270829544028, 116.09405306513683], {icon: icons.kesehatan}).bindPopup('<b>puskesmas labuan tereng</b>'),
+                L.marker([-8.700728616950649, 116.10555437681928], {icon: icons.kesehatan}).bindPopup('<b>POSKESDES JEMBATAN GANTUNG, DESA JEMBATAN GANTUNG KEC.LEMBAR</b>'),
+                L.marker([-8.690207944126842, 116.07396868503469], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Pembantu</b>'),
+                L.marker([-8.692244226438483, 116.07465533050825], {icon: icons.kesehatan}).bindPopup('<b>Dinas Kesehatan</b>'),
+                L.marker([-8.701237674269194, 116.0883882399798], {icon: icons.kesehatan}).bindPopup('<b>Poliklinik Pratama</b>'),
+                L.marker([-8.711758037154475, 116.07671526692899], {icon: icons.kesehatan}).bindPopup('<b>Poskesdes Lembar Selatan</b>'),
+                L.marker([-8.71878749789224, 116.07748527621297], {icon: icons.kesehatan}).bindPopup('<b>Apotek humaira lembar</b>'),
+                L.marker([-8.711938729590285, 116.07553655891712], {icon: icons.kesehatan}).bindPopup('<b>Rumah Bekam Muslimah</b>'),
+                L.marker([-8.724352029699904, 116.07589743249045], {icon: icons.kesehatan}).bindPopup('<b>Rapid Test Klinik Kreshna Husada Lembar</b>'),
+
+                //wisata lembar
+                L.marker([-8.743640961764159, 116.11226098109975], {icon: icons.wisata}).bindPopup('<b>Berugak Elen</b>'),
+                L.marker([-8.747458436015602, 116.10161797625929], {icon: icons.wisata}).bindPopup('<b>Bunbeleng sunset view</b>'),
+                L.marker([-8.813138549225107, 116.1016691414179], {icon: icons.wisata}).bindPopup('<b>Tibu sak blek</b>'),
+                L.marker([-8.77496879261101, 116.11265546899514], {icon: icons.wisata}).bindPopup('<b>Embung Selok</b>'),
+                L.marker([-8.705235246686016, 116.10664731994594], {icon: icons.wisata}).bindPopup('<b>Bukit Batu Idung (BBI)</b>'),
+                L.marker([-8.746635810913464, 116.10819227226149], {icon: icons.wisata}).bindPopup('<b>Bukit Dollar</b>'),
+                L.marker([-8.73075766582085, 116.08790006445854], {icon: icons.wisata}).bindPopup('<b>Gilimas trans</b>'),
+                L.marker([-8.732878562979906, 116.07648458346031], {icon: icons.wisata}).bindPopup('<b>Labuan Tereng</b>'),
+                L.marker([-8.736356808213, 116.05794515567369], {icon: icons.wisata}).bindPopup('<b>Pantai Cemare</b>'),
+                L.marker([-8.729994139891957, 116.06034841483122], {icon: icons.wisata}).bindPopup('<b>Gili Broccoli</b>'),
+                L.marker([-8.730333484942147, 116.05571355788456], {icon: icons.wisata}).bindPopup('<b>PANTE CEMARE LEMBAR</b>'),
+                L.marker([-8.71989848353293, 116.06326665809394], {icon: icons.wisata}).bindPopup('<b>Ekowisata Lembar Selatan (ELS)</b>'),
+                L.marker([-8.71582620876876, 116.06532659451467], {icon: icons.wisata}).bindPopup('<b>Eco Wisata Mangrove Forest Lembar Selatan</b>'),
+                L.marker([-8.719706455058917, 116.05802845973845], {icon: icons.wisata}).bindPopup('<b>Pantai Cemare Lembar</b>'),
+                L.marker([-8.726545249803747, 116.083154723694], {icon: icons.wisata}).bindPopup('<b>Bale Telu</b>'),
+                L.marker([-8.72092726643315, 116.05769080313003], {icon: icons.wisata}).bindPopup('<b>Bale Penyu Cemara</b>'),
+
+                //sekolah lembar
+                L.marker([-8.78842429156224, 116.10410355889694], {icon: icons.sekolah}).bindPopup('<b>SMPN 3 Lembar</b>'),
+                L.marker([-8.772589285558631, 116.1170950075358], {icon: icons.sekolah}).bindPopup('<b>SMPN 4 Lembar</b>'),
+                L.marker([-8.767596125537919, 116.11132103036296], {icon: icons.sekolah}).bindPopup('<b>SMA Negeri 3 Lembar</b>'),
+                L.marker([-8.753186916199951, 116.08649292851983], {icon: icons.sekolah}).bindPopup('<b>SMPN 2 Lembar</b>'),
+                L.marker([-8.677137015579193, 116.08259549326608], {icon: icons.sekolah}).bindPopup('<b>SDN 3 Lembar Lombok Barat</b>'),
+                L.marker([-8.695829887537856, 116.07249103321362], {icon: icons.sekolah}).bindPopup('<b>SDN 2 LEMBAR</b>'),
+                L.marker([-8.715520606406871, 116.06426311574236], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 3 Lembar Selatan</b>'),
+                L.marker([-8.732784803567123, 116.0877920727216], {icon: icons.sekolah}).bindPopup('<b>TK & SD IT Imam Bukhori Lembar</b>'),
+                L.marker([-8.727077719276854, 116.09775218333031], {icon: icons.sekolah}).bindPopup('<b>SMKN 1 LEMBAR</b>'),
+                L.marker([-8.707958351429077, 116.07552237121496], {icon: icons.sekolah}).bindPopup('<b>SMPN 1 Lembar</b>'),
+                L.marker([-8.720152977660762, 116.08316376868068], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 6 Lembar</b>'),
+                L.marker([-8.716520898681168, 116.08913489061015], {icon: icons.sekolah}).bindPopup('<b>Madrasah Tsanawiyah Aunul Ibad NW Beroro</b>'),
+                L.marker([-8.705069529762918, 116.0877059041655], {icon: icons.sekolah}).bindPopup('<b>SMKN 2 LEMBAR</b>'),
+                L.marker([-8.707036970512576, 116.07265051126637], {icon: icons.sekolah}).bindPopup('<b>SMK INTERNASIONAL HARAPAN SEJAHTERA</b>'),
+                L.marker([-8.70607847502941, 116.07862163319587], {icon: icons.sekolah}).bindPopup('<b>MTS. Nujumul Huda Batu Samban</b>'),
+                L.marker([-8.702345363956155, 116.08857350307831], {icon: icons.sekolah}).bindPopup('<b>SDIT Assalam Lembar</b>'),
+                L.marker([-8.703808344354355, 116.09209493395981], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 5 Lembar</b>'),
+                L.marker([-8.703707449338062, 116.08979834860232], {icon: icons.sekolah}).bindPopup('<b>SMA Negeri 1 Lembar</b>')
+
+            ]),
+            "Gunung Sari": L.layerGroup([
+                L.geoJSON(gunung_sari, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                //camat
+                L.marker([-8.54010489534115, 116.10080277498133], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat gunungsari</b>'),
+
+                //keamanan
+                L.marker([-8.539140924702037, 116.09870633856242], {icon: icons.keamanan}).bindPopup('<b>Polsek Gunung Sari</b>'),
+                L.marker([-8.539819957892437, 116.09883508458871], {icon: icons.keamanan}).bindPopup('<b>Polsek baru Gunung Sari</b>'),
+
+                //kesehatan
+                L.marker([-8.547878079970094, 116.08473623424264], {icon: icons.kesehatan}).bindPopup('<b>NEW KLINIK</b>'),
+                L.marker([-8.555320683905991, 116.09333932353445], {icon: icons.kesehatan}).bindPopup('<b>Jasa formalin</b>'),
+                L.marker([-8.540310664742666, 116.10117673781052], {icon: icons.kesehatan}).bindPopup('<b>Rumah Sakit Hewan Pendidikan</b>'),
+                L.marker([-8.54915123706205, 116.12892583082974], {icon: icons.kesehatan}).bindPopup('<b>Posyandu Permata Hati</b>'),
+                L.marker([-8.546904642406284, 116.1179968705524], {icon: icons.kesehatan}).bindPopup('<b>Poskesdes Desa Ranjok</b>'),
+                L.marker([-8.53563964059455, 116.13203574493811], {icon: icons.kesehatan}).bindPopup('<b>POS KESEHATAN MEDICUSS</b>'),
+
+                //wisata
+                L.marker([-8.477122604873463, 116.12352524497703], {icon: icons.wisata}).bindPopup('<b>Air Terjun Batu Butir</b>'),
+                L.marker([-8.49562483301856, 116.09795914522329], {icon: icons.wisata}).bindPopup('<b>Wisata kokok ijo</b>'),
+                L.marker([-8.500378580798126, 116.14533768290022], {icon: icons.wisata}).bindPopup('<b>Air Terjun Tibu Tereng</b>'),
+                L.marker([-8.50479272238381, 116.14774094205774], {icon: icons.wisata}).bindPopup('<b>Ujung Aspal</b>'),
+                L.marker([-8.522618545775181, 116.10362397038031], {icon: icons.wisata}).bindPopup('<b>Bukit Persinggahan Juan Kekait</b>'),
+                L.marker([-8.520241817302317, 116.10808716595857], {icon: icons.wisata}).bindPopup('<b>Bukit Tembere</b>'),
+                L.marker([-8.546045506662857, 116.10654221364301], {icon: icons.wisata}).bindPopup('<b>Gunung sari</b>'),
+                L.marker([-8.54859182879594, 116.09761582248652], {icon: icons.wisata}).bindPopup('<b>GG.TELAGA</b>'),
+                L.marker([-8.534671726920607, 116.10911713416895], {icon: icons.wisata}).bindPopup('<b>Weekend Hills</b>'),
+                L.marker([-8.530427692427835, 116.12302170500892], {icon: icons.wisata}).bindPopup('<b>Taman Negeri Kayangan</b>'),
+                L.marker([-8.522448779945607, 116.12731323921878], {icon: icons.wisata}).bindPopup('<b>Tanah Pak Sofa</b>'),
+                L.marker([-8.553344917928518, 116.12319336637732], {icon: icons.wisata}).bindPopup('<b>Wisata melon Haji Seneng</b>'),
+                L.marker([-8.50273835871744, 116.14777989072749], {icon: icons.wisata}).bindPopup('<b>Tibu Tereng Waterfall</b>'),
+                L.marker([-8.517900233584193, 116.12145273708656], {icon: icons.wisata}).bindPopup('<b>Bukit syahrul</b>'),
+                L.marker([-8.516099568992123, 116.11416976202696], {icon: icons.wisata}).bindPopup('<b>Pintu Air</b>'),
+                L.marker([-8.553469892460289, 116.13093737887212], {icon: icons.wisata}).bindPopup('<b>Taman Desa Wisata Kekeri</b>'),
+                L.marker([-8.555135319355731, 116.13211118916595], {icon: icons.wisata}).bindPopup('<b>Sawah Desa Kekeri</b>'),
+                L.marker([-8.55405026932624, 116.13272361192793], {icon: icons.wisata}).bindPopup('<b>Sungai Meniting</b>'),
+
+                //sekolah
+                L.marker([-8.513260255818942, 116.14909406009963], {icon: icons.sekolah}).bindPopup('<b>PKBM Al-Ikhtiar, Desa Bukit Tinggi, Kec. Gunung Sari</b>'),
+                L.marker([-8.532467050237065, 116.14205385087537], {icon: icons.sekolah}).bindPopup('<b>SD, SMP, SMA Satap 4 Giningsari Lombok Barat</b>'),
+                L.marker([-8.525384657104476, 116.10236163680068], {icon: icons.sekolah}).bindPopup('<b>SDN 2 Kekait gunungsari</b>'),
+                L.marker([-8.531986892140061, 116.10527482682451], {icon: icons.sekolah}).bindPopup('<b>SDN 2 Gunungsari</b>'),
+                L.marker([-8.535347986140103, 116.12967279327411], {icon: icons.sekolah}).bindPopup('<b>Paud Assidqi Jeringo, Gunungsari</b>'),
+                L.marker([-8.551072711229422, 116.09471451298815], {icon: icons.sekolah}).bindPopup('<b>SMK Negeri 1 Gunungsari</b>'),
+                L.marker([-8.547111582035201, 116.09653525675306], {icon: icons.sekolah}).bindPopup('<b>MI Negeri 2 Lombok Barat</b>'),
+                L.marker([-8.546991547174587, 116.12299673280282], {icon: icons.sekolah}).bindPopup('<b>SMPN 4 Gunungsari</b>'),
+                L.marker([-8.547711755771289, 116.12627407157963], {icon: icons.sekolah}).bindPopup('<b>SMA PGRI</b>'),
+                L.marker([-8.545191019730552, 116.13671300249838], {icon: icons.sekolah}).bindPopup('<b>SMPN 2 Gunungsari</b>'),
+                L.marker([-8.5384689755013, 116.13865512918089], {icon: icons.sekolah}).bindPopup('<b>SD-SMP Negeri Satu Atap 4 Gunungsari</b>'),
+                L.marker([-8.550352509289075, 116.08403281414621], {icon: icons.sekolah}).bindPopup('<b>SMPN 3 Gunung sari</b>'),
+                L.marker([-8.54303037588089, 116.10588173932496], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Gunungsari</b>'),
+                L.marker([-8.53858901334951, 116.1009050397009], {icon: icons.sekolah}).bindPopup('<b>SMPN 1 Gunungsari</b>'),
+                L.marker([-8.538108862875125, 116.09868980148389], {icon: icons.sekolah}).bindPopup('<b>SMAN 1 Gunungsari</b>'),
+                L.marker([-8.542310158365328, 116.10415203277854], {icon: icons.sekolah}).bindPopup('<b>SPNF-SKB Lombok Barat</b>'),
+                L.marker([-8.540509608820027, 116.10026777941347], {icon: icons.sekolah}).bindPopup('<b>SDN 3 Gunungsari</b>'),
+                L.marker([-8.540779691793574, 116.10008570503697], {icon: icons.sekolah}).bindPopup('<b>SDN 3 Gunungsari</b>')
+
+            ]),
+
+            "Batu Layar": L.layerGroup([
+                L.geoJSON(batu_layar, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                L.marker([-8.525068795977502, 116.06724469771781], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat Batulayar </b>'),
+            
+                //keamanan
+            L.marker([-8.49218633417714, 116.0507248839334], {icon: icons.keamanan}).bindPopup('<b>Polsek Senggigi</b>'),
+            L.marker([-8.492865450697382, 116.03888024951416], {icon: icons.keamanan}).bindPopup('<b>Pol Transit Damri</b>'),
+                
+            //kesehatan
+                L.marker([-8.529863212635675, 116.08177854270683], {icon: icons.kesehatan}).bindPopup('<b>Posyandu Mentari</b>'),
+     
+                //wisata
+                L.marker([-8.477678122580306, 116.05573857927571], {icon: icons.wisata}).bindPopup('<b>Taman Wisata Alam Kerandangan</b>'),
+                L.marker([-8.502625198134133, 116.05376601027466], {icon: icons.wisata}).bindPopup('<b>Pantai Batu Bolong</b>'),
+                L.marker([-8.505171809555993, 116.05574011601118], {icon: icons.wisata}).bindPopup('<b>Beach</b>'),
+                L.marker([-8.508057948704941, 116.05685591490575], {icon: icons.wisata}).bindPopup('<b>Objek Wisata Batu Bolong</b>'),
+                L.marker([-8.49948435407627, 116.08990072832172], {icon: icons.wisata}).bindPopup('<b>Bukit Bengkaung Lembah Sari</b>'),
+                L.marker([-8.505850903076666, 116.07582449611336], {icon: icons.wisata}).bindPopup('<b>The Jungle House - Batulayar Lombok🌴🌴</b>'),
+                L.marker([-8.509840553197357, 116.06466650716769], {icon: icons.wisata}).bindPopup('<b>Bukit Batu layar</b>'),
+                L.marker([-8.51196269058257, 116.0742795437978], {icon: icons.wisata}).bindPopup('<b>Tanah batulayar tyo</b>'),
+                L.marker([-8.517765868937943, 116.064294490211], {icon: icons.wisata}).bindPopup('<b>Wisata Lingkok Emas</b>'),
+                L.marker([-8.516168768789878, 116.06013542227869], {icon: icons.wisata}).bindPopup('<b>Objek Wisata Batu Layar</b>'),
+                
+                //sekolah
+                L.marker([-8.473427712331704, 116.04200565666008], {icon: icons.sekolah}).bindPopup('<b>SMK NEGERI 1 BATULAYAR</b>'),
+                L.marker([-8.494677380630566, 116.08303308282905], {icon: icons.sekolah}).bindPopup('<b>SDN3 batulayar Barat</b>'),
+                L.marker([-8.501160096092699, 116.08473244367629], {icon: icons.sekolah}).bindPopup('<b>SDN 2 BATULAYAR</b>'),
+                L.marker([-8.509443406295267, 116.06057724306201], {icon: icons.sekolah}).bindPopup('<b>SDN 2 BATULAYAR BARAT</b>'),
+                L.marker([-8.514245243497589, 116.08242616841626], {icon: icons.sekolah}).bindPopup('<b>SDN 4 Batulayar</b>'),
+                L.marker([-8.547856413287827, 116.07987712714541], {icon: icons.sekolah}).bindPopup('<b>Pendidikan</b>'),
+                L.marker([-8.533692066635162, 116.0945644601822], {icon: icons.sekolah}).bindPopup('<b>LKP Puncang Hijau</b>'),
+                L.marker([-8.534412300338106, 116.08849531429925], {icon: icons.sekolah}).bindPopup('<b>SMPN 2 Batulayar</b>'),
+                L.marker([-8.53729322156245, 116.08570350719307], {icon: icons.sekolah}).bindPopup('<b>TK Negeri 2 Batu Layar</b>'),
+                L.marker([-8.528290270567725, 116.08279031716924], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Senteluk</b>'),
+                L.marker([-8.522768355653437, 116.07939159547476], {icon: icons.sekolah}).bindPopup('<b>SDN 1 BATULAYAR</b>'),
+                L.marker([-8.535252571274382, 116.07368659834475], {icon: icons.sekolah}).bindPopup('<b>SMA Negeri 1 Batu Layar</b>'),
+                L.marker([-8.529850797278149, 116.07259415208584], {icon: icons.sekolah}).bindPopup('<b>SMPN 1 BATULAYAR</b>'),
+                L.marker([-8.51304478991193, 116.0684671328854], {icon: icons.sekolah}).bindPopup('<b>PAUD Nurul Iman EF Batu Layar</b>'),
+                L.marker([-8.512924744346295, 116.06506841119094], {icon: icons.sekolah}).bindPopup('<b>SD Islam Bilal Bin Robah Batulayar</b>'),
+                L.marker([-8.524417321209485, 116.06653951564473], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Batu Layar Barat</b>'),
+                L.marker([-8.524247556178665, 116.06701158440781], {icon: icons.sekolah}).bindPopup('<b>Paud Ar-rahman Melase</b>'),
+                L.marker([-8.543904284512761, 116.07406942844138], {icon: icons.sekolah}).bindPopup('<b>SMK Negeri 1 Batulayar</b>'),
+                L.marker([-8.543946723592647, 116.07224552640221], {icon: icons.sekolah}).bindPopup('<b>Batulayar</b>'),
+            ]),
+
+            "Lingsar": L.layerGroup([
+                L.geoJSON(lingsar, { style: { color: "blue", weight: 2, opacity: 1 } }),
+                //camat
+                L.marker([-8.573130485551289, 116.18274000326461], {icon: icons.pemerintah}).bindPopup('<b>Kantor Camat lingsar</b>'),
+
+                //keamanan lingsar
+                L.marker([-8.564242236440661, 116.16829279371787], {icon: icons.keamanan}).bindPopup('<b>Polsek Lingsar</b>'),
+
+                //kesehatan lingsar
+                L.marker([-8.584983517578276, 116.16262667530827], {icon: icons.kesehatan}).bindPopup('<b>Satu rasa</b>'),
+                L.marker([-8.578132316107066, 116.14992392552806], {icon: icons.kesehatan}).bindPopup('<b>Distributor K-LINK MATARAM</b>'),
+                L.marker([-8.57613402572838, 116.16565801332402], {icon: icons.kesehatan}).bindPopup('<b>KAVLINGAN KROYE DES.GONTORAN.KECAMTAN LINGSAR (OWENR MARZUKI)</b>'),
+                L.marker([-8.571709202489584, 116.19986882807298], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Lingsar</b>'),
+                L.marker([-8.548727841055772, 116.15901793957525], {icon: icons.kesehatan}).bindPopup('<b>homecare & dokter</b>'),
+                L.marker([-8.55643602994816, 116.1874547771514], {icon: icons.kesehatan}).bindPopup('<b>Pustu Karang Bayan</b>'),
+                L.marker([-8.55500859932792, 116.16464756731874], {icon: icons.kesehatan}).bindPopup('<b>PUSTU Langko Desa Langko</b>'),
+                L.marker([-8.558719907810978, 116.17879381139218], {icon: icons.kesehatan}).bindPopup('<b>POSKESDES (Pos Kesehatan Desa)</b>'),
+                L.marker([-8.565143240832855, 116.19943577978502], {icon: icons.kesehatan}).bindPopup('<b>Family Homecare</b>'),
+                L.marker([-8.571280991055126, 116.17763901595761], {icon: icons.kesehatan}).bindPopup('<b>Apotek Lingsar</b>'),
+                L.marker([-8.5832707288014, 116.17994860682671], {icon: icons.kesehatan}).bindPopup('<b>Home Care Fisioterapi</b>'),
+                L.marker([-8.558006197450482, 116.21040633641337], {icon: icons.kesehatan}).bindPopup('<b>KLINIK PRATAMA BUMI SEHAT LOMBOK</b>'),
+                L.marker([-8.558291681755229, 116.19813663492114], {icon: icons.kesehatan}).bindPopup('<b>Klinik Jepun Link Medical</b>'),
+                L.marker([-8.564001322886714, 116.15223351639717], {icon: icons.kesehatan}).bindPopup('<b>Puskesmas Sigerongan</b>'),
+                L.marker([-8.564001322886714, 116.17951555853877], {icon: icons.kesehatan}).bindPopup('<b>Puskesdes Desa Saribaye</b>'),
+                L.marker([-8.584127124155977, 116.17994860682671], {icon: icons.kesehatan}).bindPopup('<b>Home Care Fisioterapi</b>'),
+                L.marker([-8.57727590723194, 116.19943577978502], {icon: icons.kesehatan}).bindPopup('<b>Apotek Cindra Farma 2</b>'),
+                L.marker([-8.569710878335377, 116.17980425739741], {icon: icons.kesehatan}).bindPopup('<bPuskesmas Pembantu Lingsar></b>'),
+                L.marker([-8.583413461494677, 116.17980425739741], {icon: icons.kesehatan}).bindPopup('<b>Poskesdes Gegelang</b>'),
+                L.marker([-8.57214975719613, 116.16471900746212], {icon: icons.kesehatan}).bindPopup('<b>Central Posyandu Desa Peteluan Indah</b>'),
+
+                //wisata lingsar
+                L.marker([-8.583570066550227, 116.19256741882593], {icon: icons.wisata}).bindPopup('<b>Kolam Nyurlembang</b>'),
+                L.marker([-8.561365434848012, 116.21236908813053], {icon: icons.wisata}).bindPopup('<b>Manggong desa batukumbung, Lingsar kab. Lombok barat NTB</b>'),
+                L.marker([-8.563787821323059, 116.19787508276325], {icon: icons.wisata}).bindPopup('<b>Kolam Renang Batu Ngompal</b>'),
+                L.marker([-8.528661710094354, 116.23890740781712], {icon: icons.wisata}).bindPopup('<b>Wisata Alam Aiknyet</b>'),
+                L.marker([-8.499185584079175, 116.21298151089253], {icon: icons.wisata}).bindPopup('<b>Air Terjun Timponan</b>'),
+                L.marker([-8.567825097840428, 116.16868293110801], {icon: icons.wisata}).bindPopup('<b>Kali Jangkuk ONOR</b>'),
+                L.marker([-8.543802672063926, 116.14928954364474], {icon: icons.wisata}).bindPopup('<b>Kolam pemandian</b>'),
+                L.marker([-8.535727567082013, 116.2299252073078], {icon: icons.wisata}).bindPopup('<b>Air Terjun Tibu Atas</b>'),
+                L.marker([-8.576101380688607, 116.1872597548886], {icon: icons.wisata}).bindPopup('<b>Rumah presean</b>'),
+                L.marker([-8.571256749182307, 116.17909411806197], {icon: icons.wisata}).bindPopup('<b>Telaga Beleq Lingsar</b>'),
+                L.marker([-8.52381647548503, 116.19828336460456], {icon: icons.wisata}).bindPopup('<b>Reban</b>'),
+                L.marker([-8.560961702269715, 116.1764402860933], {icon: icons.wisata}).bindPopup('<b>kebun lina ersan</b>'),
+                L.marker([-8.523645311517217, 116.15716165667635], {icon: icons.wisata}).bindPopup('<b>Wisata Edukasi Kampung Lebah Murpeji</b>'),
+                L.marker([-8.515793702480115, 116.17188529846706], {icon: icons.wisata}).bindPopup('<b>SIDIRAHMAN</b>'),
+                L.marker([-8.499947237349287, 116.18069061365561], {icon: icons.wisata}).bindPopup('<b>Air Terjun Jero Kerti</b>'),
+
+                //sekolah lingsar
+                L.marker([-8.544376875829537, 116.20994430572051], {icon: icons.sekolah}).bindPopup('<b>SMPN 5 LINGSAR</b>'),
+                L.marker([-8.550148540176389, 116.15947586341252], {icon: icons.sekolah}).bindPopup('<b>MIN 1 LOMBOK BARAT</b>'),
+                L.marker([-8.56101261236149, 116.15192276320315], {icon: icons.sekolah}).bindPopup('<b>TK Negeri 1 Lingsar</b>'),
+                L.marker([-8.568481482129636, 116.18247848677738], {icon: icons.sekolah}).bindPopup('<b>SMA Negeri 1 Lingsar</b>'),
+                L.marker([-8.583079303905766, 116.1694322227794], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 3 Gerimax Indah</b>'),
+                L.marker([-8.579005549605407, 116.18316513225096], {icon: icons.sekolah}).bindPopup('<b>SDN 1 GEGELANG .KEC. LINGSAR</b>'),
+                L.marker([-8.57795498750937, 116.1987863157992], {icon: icons.sekolah}).bindPopup('<b>SMP NEGERI 2 LINGSAR</b>'),
+                L.marker([-8.55554849642294, 116.13527160949319], {icon: icons.sekolah}).bindPopup('<b>SMKN 2 Lingsar</b>'),
+                L.marker([-8.563017473430396, 116.1735520946452], {icon: icons.sekolah}).bindPopup('<b>SDN 1 Saribaya Lingsar</b>'),
+                L.marker([-8.567940128128809, 116.1986146544308], {icon: icons.sekolah}).bindPopup('<b>SMKN 1 Lingsar</b>'),
+                L.marker([-8.570656048274625, 116.15192276222746], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 1 Lingsar</b>'),
+                L.marker([-8.570825792639587, 116.17372375601356], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 1 Lingsar</b>'),
+                L.marker([-8.560131749686011, 116.14969116443832], {icon: icons.sekolah}).bindPopup('<b>Pon-Pes Darunnajah Duman, Lingsar</b>'),
+                L.marker([-8.558253138896784, 116.13753797396015], {icon: icons.sekolah}).bindPopup('<b>SMPN 3 Lingsar</b>'),
+                L.marker([-8.567164906239105, 116.15684987790455], {icon: icons.sekolah}).bindPopup('<b>SMP Negeri 4 Lingsar</b>'),
+                L.marker([-8.573398113783048, 116.17779947460005], {icon: icons.sekolah}).bindPopup('<b>SD Negeri 2 Lingsar</b>'),
+                L.marker([-8.57311305061407, 116.17939262539433], {icon: icons.sekolah}).bindPopup('<b>MA RAUDHATUL ILMI NW LINGSAR</b>'),
+                L.marker([-8.572542923634659, 116.18009057717089], {icon: icons.sekolah}).bindPopup('<b>YPP AL-ISTIQOMAH NW LINGSAR</b>'),
+                L.marker([-8.57311305061407, 116.17999953998263], {icon: icons.sekolah}).bindPopup('<b>MTs. NW Lingsar</b>')
+            ])
+                
+        };
+
+        // Tambahkan setiap layer kecamatan ke peta
+        for (let key in kecamatanLayers) {
+            kecamatanLayers[key].addTo(map);
+        }
+
+        // Layer kontrol
+        var baseMaps = {
+    "Base Peta": openStreetMap,
+    "OpenStreetMap": openStreetMap,
+    "Satellite": satelliteMap,
+    "Street Map": streetMap
+};
+
+
+        var overlayMaps = kecamatanLayers;
+
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+</script>    
+</body>
+</html>
